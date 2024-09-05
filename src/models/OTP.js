@@ -5,7 +5,7 @@ const otpSchema = new Schema({
     type: String,
     require: true,
   },
-  otpCode: {
+  otp: {
     type: String,
     require: true,
   },
@@ -19,6 +19,8 @@ const otpSchema = new Schema({
     default: false,
   },
 });
+otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
 const OTP = models.OTP || model("OTP", otpSchema);
 
 export default OTP;
