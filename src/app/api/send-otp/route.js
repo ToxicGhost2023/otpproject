@@ -1,21 +1,35 @@
 import connectDB from "@/utils/connectDB";
 import OTP from "@/models/OTP";
-import { makeOtp } from "@/utils/otp";
+
 import { NextResponse } from "next/server";
+import { makeOtp } from "@/utils/otp";
 
 export async function POST(req) {
   try {
     await connectDB();
     const { phoneNumber } = await req.json();
-    const otp = makeOtp();
+
+    if (!phoneNumber) {
+      return NextResponse.json(
+        {
+          message: "لطفا شماره موبایل خود را وارد کنید",
+        },
+        { status: 400 }
+      );
+    }
+
+    const otpCode = makeOtp();
+
     const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
-    await OTP.create({
+
+    const otpShow = await OTP.create({
       phoneNumber,
-      otp,
+      otp: otpCode,
       expiresAt,
     });
-    console.log(` رمز یبار مصرف شما:${otp}`);
-    return NextResponse.json({ success: true, status: 201, data: otp });
+
+    console.log(` رمز یبار مصرف شما:${otpCode}`);
+    return NextResponse.json({ success: true, status: 201, data: otpCode });
   } catch (error) {
     console.error("مشکلی در سرور رخ داده دوباره امتحان کنید:", error);
     return NextResponse.json(

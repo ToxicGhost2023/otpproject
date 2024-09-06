@@ -5,24 +5,39 @@ import { NextResponse } from "next/server";
 export async function POST(req) {
   try {
     await connectDB();
+    const { phoneNumber, otpCode } = await req.json();
 
-    const { phoneNumber, otp } = req.json();
-
-    const isVAlide = await OTP.findOne({ phoneNumber, otp });
-
-    if (isVAlide) {
-      await OTP.deleteOne({ phoneNumber, otp });
-      return NextResponse.json({ success: true, status: 200 });
-    } else {
+    if (!phoneNumber || !otpCode) {
       return NextResponse.json(
-        { success: false, message: "رمز یکبار مصرف منقضی شده" },
+        {
+          message: "لطفا شماره موبایل و OTP را وارد کنید",
+        },
         { status: 400 }
       );
     }
+
+    // پیدا کردن OTP مربوط به شماره موبایل
+    const otpRecord = await OTP.findOne({ phoneNumber, otps: otpCode });
+
+    if (!otpRecord) {
+      return NextResponse.json(
+        { success: false, message: "OTP نامعتبر است یا منقضی شده" },
+        { status: 400 }
+      );
+    }
+
+    // حذف رکورد OTP پس از تأیید موفقیت‌آمیز
+    await otpRecord.remove();
+
+    console.log("OTP verified successfully");
+    return NextResponse.json({
+      success: true,
+      message: "احراز هویت موفقیت‌آمیز بود",
+    });
   } catch (error) {
-    console.error("Error in verifying OTP:", error);
+    console.error("Server error:", error);
     return NextResponse.json(
-      { success: false, message: "مشکلی در سرور ایجاد شده" },
+      { success: false, message: "مشکلی در سرور رخ داده" },
       { status: 500 }
     );
   }
