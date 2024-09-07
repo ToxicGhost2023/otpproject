@@ -20,13 +20,15 @@ export async function POST(req) {
 
     const otpCode = makeOtp();
 
-    const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
+    const expiresAtTime = new Date(Date.now() + 5 * 60 * 1000);
 
     const otpShow = await OTP.create({
       phoneNumber,
       otp: otpCode,
-      expiresAt,
+      expiresAt: expiresAtTime,
     });
+
+    console.log(otpShow);
 
     console.log(` رمز یبار مصرف شما:${otpCode}`);
     return NextResponse.json({ success: true, status: 201, data: otpCode });

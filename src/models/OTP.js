@@ -9,15 +9,11 @@ const otpSchema = new Schema({
     type: String,
     require: true,
   },
-  expiresAt: { type: Date, required: true },
+  expiresAt: { type: Date, required: true, index: { expires: "5m" } },
   createdAt: {
     type: Date,
     default: Date.now(),
-    expiers: 30,
-  },
-  isVerified: {
-    type: Boolean,
-    default: false,
+    required: true,
   },
 });
 otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
